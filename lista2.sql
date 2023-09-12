@@ -303,4 +303,36 @@ BEGIN
 END //
 DELIMITER ;
 
+--exercicio 9
+DELIMITER //
+CREATE PROCEDURE sp_TitulosPorCategoria(IN CategoriaNome VARCHAR(100))
+BEGIN
+    DECLARE done INT DEFAULT 0;          
+    DECLARE livroTitulo VARCHAR(255);    
+    
+    DECLARE cur CURSOR FOR
+        SELECT Livro.Titulo
+        FROM Livro
+        JOIN Categoria ON Livro.Categoria_ID = Categoria.Categoria_ID
+        WHERE Categoria.Nome = CategoriaNome;
+    
+    DECLARE CONTINUE HANDLER FOR NOT FOUND SET done = 1;
+    
+    OPEN cur;
+    
+    CREATE TEMPORARY TABLE IF NOT EXISTS Temp_Titulos (Titulo VARCHAR(255));
+    
+    FETCH cur INTO livroTitulo;
+    
+    WHILE NOT done DO
+        INSERT INTO Temp_Titulos (Titulo) VALUES (livroTitulo);
+        FETCH cur INTO livroTitulo;
+    END WHILE;
+    CLOSE cur;
+    
+    SELECT Titulo FROM Temp_Titulos;
+    
+    DROP TEMPORARY TABLE IF EXISTS Temp_Titulos;
+END //
+DELIMITER ;
 
